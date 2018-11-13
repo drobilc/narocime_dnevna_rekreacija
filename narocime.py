@@ -8,7 +8,7 @@ class Client(object):
 
 	def __init__(self):
 		self.session = requests.Session()
-		self.apiSignature = self.getApiSignature()
+		self.updateApiSignature()
 
 	def getApiSignature(self):
 		url = "https://sportul.naroci.me/narocilo/workout/embedded"
@@ -17,6 +17,9 @@ class Client(object):
 		if result:
 			return unquote(result.group(1))
 		return None
+
+	def updateApiSignature(self):
+		self.apiSignature = self.getApiSignature()
 
 	def getEvents(self, dateFrom, dateTo):
 		url = "https://api.naroci.me/api/v1/workout/appointment/list"
@@ -33,6 +36,7 @@ class Client(object):
 		}
 		response = self.session.post(url, params=getParameters, data=searchData)
 		if response.status_code != 200:
+			self.updateApiSignature()
 			return []
 		events = [Event.fromJson(eventData) for eventData in response.json()]
 		return events
@@ -64,11 +68,11 @@ class Client(object):
 
 class EventResult(object):
 
-	def __init__(self):
-		pass
+	def __init__(self, jsonData):
+		self.jsonData = jsonData
 
 	def fromJson(jsonData):
-		return EventResult()
+		return EventResult(jsonData)
 		
 
 class User(object):
